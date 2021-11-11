@@ -1,0 +1,42 @@
+server:
+  port: 8001
+
+spring:
+  application:
+    name: study-dubbo-provider
+
+  #dubbo begin#
+  dubbo:
+    #应用配置，用于配置当前应用信息，不管该应用是提供者还是消费者
+    application:
+      # dubbo提供者的别名，只是个标识
+      name: ${spring.application.name}
+      owner: study
+    # 表示从注册中心发现监控中心地址，否则直连监控中心
+    monitor:
+      protocol: registry
+    server:
+      register: true
+    # 启动时连接超时时间
+    consumer:
+      timeout: 6000
+      # 不检查是否有提供者。否则没有提供者启动会失败
+      check: false
+    #注册中心配置，用于配置连接注册中心相关信息
+    registry:
+      protocol: zookeeper
+      # zk地址
+      address: zookeeper://zk1-test.xxx.com:2181?backup=zk2-test.xxx.com:2181,zk3-test.xxx.com:2181
+      timeout: 60000
+    #协议配置，用于配置提供服务的协议信息，协议由提供方指定，消费方被动接受
+    protocol:
+      # dubbo协议
+      name: dubbo
+      # duboo端口号
+      port: 20880
+      # 服务线程池大小(固定大小) ，默认为200
+      threads: 200
+    #服务暴露与发现消费所在的package，默认扫描所有包
+#    scan: com.heqing.dubbo.service
+  #dubbo end#
+

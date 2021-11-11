@@ -1,0 +1,63 @@
+dubbo官方文档：https://dubbo.apache.org/zh/
+
+
+1、启动时检查
+缺省会在启动时检查依赖的服务是否可用，不可用时会抛出异常，阻止Spring初始化完成，以便上线时，能及早发现问题，默认check=true。
+
+关闭所有服务的启动时检查：(没有提供者时报错)
+<dubbo:consumer check="false" />
+
+关闭某个服务的启动时检查：(没有提供者时报错)
+<dubbo:reference interface="com.foo.BarService" check="false" />
+其它的启动时检查还包括：注册中心
+
+2、直连提供者
+在开发及测试环境下，经常需要绕过注册中心，只测试指定服务提供者，这时候可能需要点对点直连，
+点对点直联方式，将以服务接口为单位，忽略注册中心的提供者列表。
+<dubbo:reference id="xxxService" interface="com.alibaba.xxx.XxxService" url="dubbo://localhost:20890" />
+
+3、服务分组
+当一个接口有多种实现时，可以用group区分。
+provider：
+<dubbo:service group="feedback" interface="com.xxx.IndexService" ref="indexServiceFeedback" />
+<dubbo:service group="member" interface="com.xxx.IndexService"   ref="indexServiceMember" />
+
+cosumer：
+<dubbo:reference id="feedbackIndexService" group="feedback" interface="com.xxx.IndexService" />
+<dubbo:reference id="memberIndexService" group="member" interface="com.xxx.IndexService" />
+
+4、多版本
+当一个接口实现，出现不兼容升级时，可以用版本号过渡，版本号不同的服务相互间不引用。
+一般处理步骤
+1）在低压力时间段，先升级一半提供者为新版本
+2）再将所有消费者升级为新版本
+3）然后将剩下的一半提供者升级为新版本
+<dubbo:service interface="com.foo.BarService" version="1.0.0" />
+<dubbo:service interface="com.foo.BarService" version="2.0.0" />
+
+5、异步调用
+可完成并行调用多个远程服务。异步总是不等待返回。
+<dubbo:reference id="fooService" interface="com.alibaba.foo.FooService">
+    <dubbo:method name="findFoo" async="true" />
+</dubbo:reference>
+
+6、延迟暴露
+如果你的服务需要Warmup时间，比如初始化缓存，等待相关资源就位等，可以使用delay进行延迟暴露。
+<dubbo:provider delay="-1" />
+当然，也可以配置到服务级别，但有些需要地方需要注意。
+
+7、dubbo:protocol属性
+threadpool：线程池类型，可选：fixed/cached ，默认fixed 。
+threads ：服务线程池大小(固定大小) ，默认为100
+
+payload：请求及响应数据包大小限制，单位：字节，默认为88388608(=8M)
+如：<dubbo:protocol name="dubbo" port="27001" threadpool="cached" threads="20"/>
+
+ThreadPool
+fixed 固定大小线程池，启动时建立线程，不关闭，一直持有。(缺省)
+cached 缓存线程池，空闲一分钟自动删除，需要时重建。
+limited可伸缩线程池，但池中的线程数只会增长不会收缩。(为避免收缩时突然来了大流量引起的性能问题)。
+
+8、dubbo:application
+<dubbo:application name="xxx_service" />
+name必填。当前应用名称，用于注册中心计算应用间依赖关系，注意：消费者和提供者应用名不要一样

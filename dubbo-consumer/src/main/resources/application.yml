@@ -1,0 +1,28 @@
+server:
+  port: 8002
+
+spring:
+  application:
+    name: study-dubbo-consumer
+
+  #dubbo begin#
+  dubbo:
+    application:
+      name: ${spring.application.name}
+      owner: study
+    monitor:
+      protocol: registry
+    server:
+      register: true
+      check: false
+    consumer:
+      timeout: 6000
+    registry:
+      protocol: zookeeper
+      address: zookeeper://zk1-test.xxx.com:2181?backup=zk2-test.xxx.com:2181,zk3-test.xxx.com:2181
+      timeout: 60000
+    protocol:
+      name: dubbo
+      port: 20880
+  #dubbo end#
+
